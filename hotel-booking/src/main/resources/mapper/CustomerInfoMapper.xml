@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.app.mapper.CustomerInfoMapper">
+
+    <resultMap type="CustomerInfo" id="CustomerInfoResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="realName" column="real_name"/>
+        <result property="avatar" column="avatar"/>
+        <result property="idCard" column="id_card"/>
+        <result property="gender" column="gender"/>
+        <result property="birthday" column="birthday"/>
+        <result property="address" column="address"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="emergencyContact" column="emergency_contact"/>
+        <result property="emergencyPhone" column="emergency_phone"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectCustomerInfoVo">
+        select customer_id, real_name, avatar, id_card, gender, birthday, address, phone, email, emergency_contact, emergency_phone, create_by, create_time, update_by, update_time, remark from hotel_customer_info
+    </sql>
+
+    <select id="selectCustomerInfoList" parameterType="CustomerInfo" resultMap="CustomerInfoResult">
+        <include refid="selectCustomerInfoVo"/>
+        <where>
+            <if test="realName != null  and realName != ''"> and real_name like concat('%', #{realName}, '%')</if>
+            <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+        </where>
+    </select>
+
+    <select id="selectCustomerInfoById" parameterType="Long" resultMap="CustomerInfoResult">
+        <include refid="selectCustomerInfoVo"/>
+        where customer_id = #{customerId}
+    </select>
+
+    <select id="selectCustomerInfoByIdCard" parameterType="String" resultMap="CustomerInfoResult">
+        <include refid="selectCustomerInfoVo"/>
+        where id_card = #{idCard}
+    </select>
+    
+    <select id="selectTotalCustomerCount" resultType="int">
+        select count(*) from hotel_customer_info
+    </select>
+
+    <insert id="insertCustomerInfo" parameterType="CustomerInfo" useGeneratedKeys="true" keyProperty="customerId">
+        insert into hotel_customer_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="realName != null and realName != ''">real_name,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="idCard != null and idCard != ''">id_card,</if>
+            <if test="gender != null and gender != ''">gender,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="address != null">address,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="email != null">email,</if>
+            <if test="emergencyContact != null">emergency_contact,</if>
+            <if test="emergencyPhone != null">emergency_phone,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="realName != null and realName != ''">#{realName},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="idCard != null and idCard != ''">#{idCard},</if>
+            <if test="gender != null and gender != ''">#{gender},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="address != null">#{address},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="email != null">#{email},</if>
+            <if test="emergencyContact != null">#{emergencyContact},</if>
+            <if test="emergencyPhone != null">#{emergencyPhone},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateCustomerInfo" parameterType="CustomerInfo">
+        update hotel_customer_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="emergencyContact != null">emergency_contact = #{emergencyContact},</if>
+            <if test="emergencyPhone != null">emergency_phone = #{emergencyPhone},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where customer_id = #{customerId}
+    </update>
+
+    <delete id="deleteCustomerInfoById" parameterType="Long">
+        delete from hotel_customer_info where customer_id = #{customerId}
+    </delete>
+
+    <delete id="deleteCustomerInfoByIds" parameterType="String">
+        delete from hotel_customer_info where customer_id in
+        <foreach item="customerId" collection="array" open="(" separator="," close=")">
+            #{customerId}
+        </foreach>
+    </delete>
+</mapper>

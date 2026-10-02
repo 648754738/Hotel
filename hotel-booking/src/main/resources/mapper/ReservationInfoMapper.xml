@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.app.mapper.ReservationInfoMapper">
+
+    <resultMap type="ReservationInfo" id="ReservationInfoResult">
+        <result property="reservationId" column="reservation_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="roomId" column="room_id"/>
+        <result property="reservationCode" column="reservation_code"/>
+        <result property="checkInDate" column="check_in_date"/>
+        <result property="checkOutDate" column="check_out_date"/>
+        <result property="nights" column="nights"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="reservationStatus" column="reservation_status"/>
+        <result property="specialRequest" column="special_request"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="contactEmail" column="contact_email"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="qrCodeData" column="qr_code_data"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap type="ReservationInfoDTO" id="ReservationInfoDTOResult">
+        <result property="reservationId" column="reservation_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="roomId" column="room_id"/>
+        <result property="reservationCode" column="reservation_code"/>
+        <result property="checkInDate" column="check_in_date"/>
+        <result property="checkOutDate" column="check_out_date"/>
+        <result property="nights" column="nights"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="reservationStatus" column="reservation_status"/>
+        <result property="specialRequest" column="special_request"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="contactEmail" column="contact_email"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="qrCodeData" column="qr_code_data"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <!-- 客户信息 -->
+        <result property="customerName" column="customer_name"/>
+        <result property="customerGender" column="customer_gender"/>
+        <!-- 房间信息 -->
+        <result property="roomNumber" column="room_number"/>
+        <result property="roomTypeName" column="room_type_name"/>
+        <result property="roomMaxOccupancy" column="room_max_occupancy"/>
+        <!-- 房间类型信息 -->
+        <result property="facility" column="facility"/>
+        <result property="imageUrls" column="image_urls"/>
+    </resultMap>
+
+    <sql id="selectReservationInfoVo">
+        select reservation_id, customer_id, room_id, reservation_code, check_in_date, check_out_date, nights, total_amount, reservation_status, special_request, contact_phone, contact_email, payment_status, qr_code_data, del_flag, create_by, create_time, update_by, update_time, remark from hotel_reservation_info
+    </sql>
+
+    <sql id="selectReservationInfoDTOVo">
+        select 
+            r.reservation_id,
+            r.customer_id,
+            r.room_id,
+            r.reservation_code,
+            r.check_in_date,
+            r.check_out_date,
+            r.nights,
+            r.total_amount,
+            r.reservation_status,
+            r.special_request,
+            r.contact_phone,
+            r.contact_email,
+            r.payment_status,
+            r.qr_code_data,
+            r.del_flag,
+            r.create_by,
+            r.create_time,
+            r.update_by,
+            r.update_time,
+            r.remark,
+            c.real_name as customer_name,
+            c.gender as customer_gender,
+            ro.room_number,
+            rt.type_name as room_type_name,
+            rt.max_occupancy as room_max_occupancy,
+            rt.facility as facility,
+            rt.image_urls as image_urls
+        from hotel_reservation_info r
+        left join hotel_customer_info c on r.customer_id = c.customer_id
+        left join hotel_room_info ro on r.room_id = ro.room_id
+        left join hotel_room_type rt on ro.type_id = rt.type_id
+    </sql>
+
+    <select id="selectReservationInfoList" parameterType="ReservationInfo" resultMap="ReservationInfoResult">
+        <include refid="selectReservationInfoVo"/>
+        <where>
+            <if test="customerId != null "> and customer_id = #{customerId}</if>
+            <if test="roomId != null "> and room_id = #{roomId}</if>
+            <if test="reservationStatus != null  and reservationStatus != ''"> and reservation_status = #{reservationStatus}</if>
+            <if test="paymentStatus != null  and paymentStatus != ''"> and payment_status = #{paymentStatus}</if>
+        </where>
+    </select>
+
+    <select id="selectReservationInfoDTOList" parameterType="ReservationInfo" resultMap="ReservationInfoDTOResult">
+        <include refid="selectReservationInfoDTOVo"/>
+        <where>
+            <if test="customerId != null "> and r.customer_id = #{customerId}</if>
+            <if test="roomId != null "> and r.room_id = #{roomId}</if>
+            <if test="reservationStatus != null  and reservationStatus != ''"> and r.reservation_status = #{reservationStatus}</if>
+            <if test="paymentStatus != null  and paymentStatus != ''"> and r.payment_status = #{paymentStatus}</if>
+        </where>
+        order by r.create_time desc
+    </select>
+
+    <select id="selectReservationInfoById" parameterType="Long" resultMap="ReservationInfoResult">
+        <include refid="selectReservationInfoVo"/>
+        where reservation_id = #{reservationId}
+    </select>
+    
+    <select id="selectReservationCountByDate" parameterType="date" resultType="int">
+        select count(*) from hotel_reservation_info 
+        where date(create_time) = date(#{date})
+    </select>
+    
+    <select id="selectRevenueByDate" parameterType="date" resultType="decimal">
+        select coalesce(sum(total_amount), 0) from hotel_reservation_info 
+        where date(create_time) = date(#{date}) and payment_status = '1'
+    </select>
+    
+    <select id="selectRoomTypeReservationCount" resultType="map">
+        select 
+            rt.type_name as typeName,
+            count(r.reservation_id) as reservationCount
+        from hotel_room_type rt
+        left join hotel_room_info ro on rt.type_id = ro.type_id
+        left join hotel_reservation_info r on ro.room_id = r.room_id
+        where r.reservation_status in ('0', '1', '2', '4')  -- 有效预订状态
+        group by rt.type_id, rt.type_name
+        order by reservationCount desc
+    </select>
+    
+    <select id="selectReservationCountByStatus" parameterType="string" resultType="int">
+        select count(*) from hotel_reservation_info 
+        where reservation_status = #{status}
+    </select>
+    
+    <select id="selectRevenueByMonth" parameterType="date" resultType="decimal">
+        select coalesce(sum(total_amount), 0) from hotel_reservation_info 
+        where year(create_time) = year(#{date}) and month(create_time) = month(#{date}) and payment_status = '1'
+    </select>
+    
+    <select id="selectTotalCustomerCount" resultType="int">
+        select count(*) from hotel_customer_info
+    </select>
+    
+    <select id="selectTotalReservationCount" resultType="int">
+        select count(*) from hotel_reservation_info
+    </select>
+    
+    <select id="selectTotalRevenue" resultType="decimal">
+        select coalesce(sum(total_amount), 0) from hotel_reservation_info where payment_status = '1'
+    </select>
+    
+    <select id="selectRecentWeekReservations" resultMap="ReservationInfoDTOResult">
+        <include refid="selectReservationInfoDTOVo"/>
+        where r.create_time >= date_sub(now(), interval 7 day)
+        order by r.create_time desc
+    </select>
+
+    <insert id="insertReservationInfo" parameterType="ReservationInfo" useGeneratedKeys="true" keyProperty="reservationId">
+        insert into hotel_reservation_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">customer_id,</if>
+            <if test="roomId != null">room_id,</if>
+            <if test="reservationCode != null and reservationCode != ''">reservation_code,</if>
+            <if test="checkInDate != null">check_in_date,</if>
+            <if test="checkOutDate != null">check_out_date,</if>
+            <if test="nights != null">nights,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="reservationStatus != null and reservationStatus != ''">reservation_status,</if>
+            <if test="specialRequest != null">special_request,</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone,</if>
+            <if test="contactEmail != null">contact_email,</if>
+            <if test="paymentStatus != null and paymentStatus != ''">payment_status,</if>
+            <if test="qrCodeData != null and qrCodeData != ''">qr_code_data,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerId != null">#{customerId},</if>
+            <if test="roomId != null">#{roomId},</if>
+            <if test="reservationCode != null and reservationCode != ''">#{reservationCode},</if>
+            <if test="checkInDate != null">#{checkInDate},</if>
+            <if test="checkOutDate != null">#{checkOutDate},</if>
+            <if test="nights != null">#{nights},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="reservationStatus != null and reservationStatus != ''">#{reservationStatus},</if>
+            <if test="specialRequest != null">#{specialRequest},</if>
+            <if test="contactPhone != null and contactPhone != ''">#{contactPhone},</if>
+            <if test="contactEmail != null">#{contactEmail},</if>
+            <if test="paymentStatus != null and paymentStatus != ''">#{paymentStatus},</if>
+            <if test="qrCodeData != null and qrCodeData != ''">#{qrCodeData},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateReservationInfo" parameterType="ReservationInfo">
+        update hotel_reservation_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="roomId != null">room_id = #{roomId},</if>
+            <if test="reservationCode != null and reservationCode != ''">reservation_code = #{reservationCode},</if>
+            <if test="checkInDate != null">check_in_date = #{checkInDate},</if>
+            <if test="checkOutDate != null">check_out_date = #{checkOutDate},</if>
+            <if test="nights != null">nights = #{nights},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="reservationStatus != null and reservationStatus != ''">reservation_status = #{reservationStatus},</if>
+            <if test="specialRequest != null">special_request = #{specialRequest},</if>
+            <if test="contactPhone != null and contactPhone != ''">contact_phone = #{contactPhone},</if>
+            <if test="contactEmail != null">contact_email = #{contactEmail},</if>
+            <if test="paymentStatus != null and paymentStatus != ''">payment_status = #{paymentStatus},</if>
+            <if test="qrCodeData != null and qrCodeData != ''">qr_code_data = #{qrCodeData},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where reservation_id = #{reservationId}
+    </update>
+
+    <delete id="deleteReservationInfoById" parameterType="Long">
+        delete from hotel_reservation_info where reservation_id = #{reservationId}
+    </delete>
+
+    <delete id="deleteReservationInfoByIds" parameterType="String">
+        delete from hotel_reservation_info where reservation_id in
+        <foreach item="reservationId" collection="array" open="(" separator="," close=")">
+            #{reservationId}
+        </foreach>
+    </delete>
+</mapper>
